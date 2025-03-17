@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",                     // 出力するJavaScriptのバージョン
+    "module": "ESNext",                     // モジュールシステムをESNextに設定
+    "moduleResolution": "Node",             // Node.jsのモジュール解決方式を使用
+    "outDir": "./",                         // 出力先ディレクトリをルートに設定
+    "rootDir": "./",                        // ソースファイルのルートディレクトリをルートに設定
+    "strict": true,                         // 厳密な型チェックを有効に
+    "esModuleInterop": true,                // ESモジュールとCommonJSモジュールの互換性を有効に
+    "skipLibCheck": true,                   // 型定義ファイルのチェックをスキップ
+    "forceConsistentCasingInFileNames": true // ファイル名の大文字小文字を一貫性を持たせる
+  },
+  "include": [
+    "*.ts"                                  // ルートディレクトリ直下のすべてのTypeScriptファイルを含める
+  ],
+  "exclude": [
+    "node_modules",                         // 除外するディレクトリ
+  ]
+}
