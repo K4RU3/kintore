@@ -68,7 +68,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 静的ファイルを提供するためのミドルウェア
-app.use(express.static(path.join(__dirname, 'site/build')));
+app.use(express.static(path.join(__dirname, 'site/dist')));
 
 // /api/addエンドポイントのPOSTリクエストを処理
 app.post('/api/add', (req: Request, res: Response) => {

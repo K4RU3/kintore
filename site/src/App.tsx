@@ -28,7 +28,7 @@ function App() {
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [username, setUsername] = useState<string>('');
+  const [username, setUsername] = useState<string>(localStorage.getItem('username') || '');
   const [kintore, setKintore] = useState<Kintore>({
     kuukiisu: 0,
     udetate: 0,
@@ -47,6 +47,7 @@ function App() {
       const result = await response.json();
       setData(result);
       setError(null);
+      localStorage.setItem('username', username);
     } catch (err) {
       setError('データの取得中にエラーが発生しました');
       console.error(err);
