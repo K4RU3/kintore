@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_レイヤー_1" data-name="レイヤー_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        letter-spacing: .2em;
+      }
+
+      .st1 {
+        fill: #e83624;
+      }
+
+      .st2 {
+        font-family: UDDigiKyokashoN-B, 'UD Digi Kyokasho N-B';
+        font-size: 256px;
+      }
+    </style>
+  </defs>
+  <g>
+    <rect class="st1" x="4" y="4" width="504" height="504" rx="122" ry="122"/>
+    <path d="M386,8c31.5,0,61.1,12.3,83.4,34.6,22.3,22.3,34.6,51.9,34.6,83.4v260.1c0,31.5-12.3,61.1-34.6,83.4s-51.9,34.6-83.4,34.6H126c-31.5,0-61.1-12.3-83.4-34.6-22.3-22.3-34.6-51.9-34.6-83.4V126c0-31.5,12.3-61.1,34.6-83.4C64.8,20.3,94.5,8,126,8h260.1M386,0H126C56.4,0,0,56.4,0,126v260.1c0,69.6,56.4,126,126,126h260.1c69.6,0,126-56.4,126-126V126c0-69.6-56.4-126-126-126h0Z"/>
+  </g>
+  <text class="st2" transform="translate(32 338.4)"><tspan class="st0" x="0" y="0">1</tspan><tspan x="192" y="0">兆</tspan></text>
+</svg>
