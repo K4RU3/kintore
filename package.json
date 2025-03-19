@@ -1,0 +1,23 @@
+{
+  "name": "tririon-exercise",
+  "version": "1.0.0",
+  "description": "1 tririon exercise challenge site",
+  "scripts": {
+    "build": "npm run build:server && npm run build:site",
+    "build:server": "cd server && npm run build",
+    "build:site": "cd site && npm run build",
+    "start": "cd app && node main.js",
+    "debug": "concurrently -n server,site \"npm run debug:server\" \"npm run debug:site\"",
+    "debug:server": "cd server && npm run debug",
+    "debug:site": "cd site && npm run debug",
+    "setup": "npm run setup:server && npm run setup:site && echo 'all dependencies installed'",
+    "setup:server": "cd server && npm install",
+    "setup:site": "cd site && npm install"
+  },
+  "keywords": [],
+  "author": "rikka",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
