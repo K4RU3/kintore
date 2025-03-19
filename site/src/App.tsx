@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { Button, Container, Typography, TextField, Box, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, CircularProgress, Autocomplete } from '@mui/material';
+import { Button, Container, Typography, TextField, Box, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, CircularProgress, Autocomplete, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, useTheme } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface Menu {
   id: string;
   name: string;
+  count: string;
 }
 
 interface Kintore {
-  kuukiisu: number | null;
-  udetate: number | null;
-  zyoutaiokoshi: number | null;
-  ranji: number | null;
+  [key: string]: number | null;
 }
 
 interface User {
@@ -33,8 +32,14 @@ function App() {
     kuukiisu: 0,
     udetate: 0,
     zyoutaiokoshi: 0,
-    ranji: 0
+    ranji: 0,
+    sukuwatto: 0,
+    puranku: 0
   });
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  
+  const theme = useTheme();
+  console.log(theme);
 
   // データを取得する関数
   const fetchData = async () => {
@@ -47,7 +52,12 @@ function App() {
       const result = await response.json();
       setData(result);
       setError(null);
-      localStorage.setItem('username', username);
+
+      // 取得したデータを基にsetKintoreを更新
+      const userKintore = result.users.find((user: User) => user.username === username);
+      if (userKintore) {
+        setKintore(userKintore.kintore);
+      }
     } catch (err) {
       setError('データの取得中にエラーが発生しました');
       console.error(err);
@@ -76,17 +86,19 @@ function App() {
       if (!response.ok) {
         throw new Error('データの送信に失敗しました');
       }
+    
+      localStorage.setItem('username', username);
 
       // 送信後にデータを再取得
       fetchData();
       
       // フォームをリセット
-      setKintore({
-        kuukiisu: 0,
-        udetate: 0,
-        zyoutaiokoshi: 0,
-        ranji: 0
-      });
+      const zeroKintore = Object.keys(kintore).reduce((acc, key) => {
+        acc[key] = 0;
+        return acc;
+      }, {} as Kintore);
+
+      setKintore(zeroKintore);
     } catch (err) {
       setError('データの送信中にエラーが発生しました');
       console.error(err);
@@ -106,8 +118,8 @@ function App() {
     if (!data) return 0;
     
     return data.users.reduce((total, user) => {
-      const userTotal = Object.values(user.kintore).reduce((sum, value) => sum + (value || 0), 0);
-      return total + userTotal;
+      const userTotal = Object.values(user.kintore).reduce((sum: number, value) => sum + (value || 0), 0);
+      return total + (userTotal || 0);
     }, 0);
   };
 
@@ -142,9 +154,26 @@ function App() {
     return data.users.map(user => user.username);
   };
 
+  // ダイアログを開く関数
+  const handleClickOpen = () => {
+    setOpenDialog(true);
+  };
+
+  // ダイアログを閉じる関数
+  const handleClose = () => {
+    setOpenDialog(false);
+  };
+
+  // ダイアログの内容を更新
+  const renderMenuDetails = () => {
+    return data?.names.map(menu => (
+      <Typography key={menu.id}>{menu.name}: {menu.count}</Typography>
+    ));
+  };
+
   if (loading) {
     return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'white' }}>
         <CircularProgress />
       </Container>
     );
@@ -164,6 +193,35 @@ function App() {
       <Typography variant="h2" component="h1" gutterBottom align="center">
         筋トレカウンター
       </Typography>
+      
+      <IconButton 
+        sx={{ position: 'absolute', top: 16, right: 16, fontSize: '4rem' }}
+        onClick={handleClickOpen}
+      >
+        <InfoIcon sx={{ fontSize: 'inherit', color: 'white' }} />
+      </IconButton>
+
+      {/* Discordサーバー参加ボタン */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
+        <Button 
+          variant="contained" 
+          startIcon={<DiscordIcon />} 
+          onClick={() => window.open('https://discord.gg/BgACCJHgvu', '_blank')}
+        >
+          Discordサーバーに参加
+        </Button>
+      </Box>
+
+      {/* ダイアログの内容 */}
+      <Dialog open={openDialog} onClose={handleClose}>
+        <DialogTitle>筋トレメニューの詳細</DialogTitle>
+        <DialogContent>
+          {renderMenuDetails()}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>閉じる</Button>
+        </DialogActions>
+      </Dialog>
       
       {/* 残り筋トレ数 */}
       <Card sx={{ mb: 4, bgcolor: 'primary.light', color: 'white' }}>

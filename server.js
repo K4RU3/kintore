@@ -11,10 +11,12 @@ const PORT = process.env.PORT || 3000;
 const defaultKintoreData = {
     users: [],
     names: [
-        { id: "kuukiisu", name: "空気椅子" },
-        { id: "udetate", name: "腕立て伏せ" },
-        { id: "zyoutaiokoshi", name: "上体起こし" },
-        { id: "ranji", name: "ランジ" }
+        { id: "kuukiisu", name: "空気椅子", count: "30秒 -> 10" },
+        { id: "udetate", name: "腕立て伏せ", count: "10回 -> 10" },
+        { id: "zyoutaiokoshi", name: "上体起こし", count: "10回 -> 10" },
+        { id: "ranji", name: "ランジ", count: "10セット -> 10" },
+        { id: "sukuwatto", name: "スクワット", count: "10回 -> 10" },
+        { id: "puranku", name: "プランク", count: "30秒 -> 10" }
     ]
 };
 // kintore.jsonを初期化する関数
@@ -30,6 +32,16 @@ const initializeKintoreData = () => {
             if (!Array.isArray(parsedData.users)) {
                 throw new Error('Invalid data format');
             }
+            // 古いプロパティをデフォルトで更新
+            parsedData.names.forEach((menu) => {
+                if (!menu.count) {
+                    const defaultMenu = defaultKintoreData.names.find(m => m.id === menu.id);
+                    if (defaultMenu) {
+                        menu.count = defaultMenu.count; // デフォルトのcountを設定
+                    }
+                }
+            });
+            fs.writeFileSync(kintoreFilePath, JSON.stringify(parsedData, null, 2)); // 更新されたデータを保存
         }
         catch (error) {
             // 不正なデータの場合、デフォルトの内容で初期化
@@ -54,33 +66,32 @@ app.post('/api/add', (req, res) => {
     const userIndex = kintoreData.users.findIndex(user => user.username === username);
     if (userIndex !== -1) {
         // ユーザーが存在する場合、kintoreデータを加算
-        kintoreData.users[userIndex].kintore.kuukiisu = (kintoreData.users[userIndex].kintore.kuukiisu || 0) + (kintore.kuukiisu || 0);
-        kintoreData.users[userIndex].kintore.udetate = (kintoreData.users[userIndex].kintore.udetate || 0) + (kintore.udetate || 0);
-        kintoreData.users[userIndex].kintore.zyoutaiokoshi = (kintoreData.users[userIndex].kintore.zyoutaiokoshi || 0) + (kintore.zyoutaiokoshi || 0);
-        kintoreData.users[userIndex].kintore.ranji = (kintoreData.users[userIndex].kintore.ranji || 0) + (kintore.ranji || 0);
+        kintoreData.names.forEach(menu => {
+            const menuId = menu.id;
+            // menuIdをstring型として扱い、インデックスアクセスを修正
+            kintoreData.users[userIndex].kintore[menuId] =
+                (kintoreData.users[userIndex].kintore[menuId] || 0) + (kintore[menuId] || 0);
+        });
     }
     else {
         // ユーザーが存在しない場合、新しいユーザーを追加
-        kintoreData.users.push({ username, kintore });
+        // 新しいユーザーのkintoreオブジェクトに全てのメニューを含める
+        const newKintore = {
+            kuukiisu: null,
+            udetate: null,
+            zyoutaiokoshi: null,
+            ranji: null,
+            sukuwatto: null,
+            puranku: null
+        };
+        kintoreData.names.forEach(menu => {
+            newKintore[menu.id] = kintore[menu.id] || 0;
+        });
+        kintoreData.users.push({ username, kintore: newKintore });
     }
-    // データの形式を検証
-    const isValidData = (data) => {
-        return Array.isArray(data.users) && data.users.every(user => typeof user.username === 'string' &&
-            typeof user.kintore === 'object' &&
-            user.kintore !== null &&
-            typeof user.kintore.kuukiisu === 'number' &&
-            typeof user.kintore.udetate === 'number' &&
-            typeof user.kintore.zyoutaiokoshi === 'number' &&
-            typeof user.kintore.ranji === 'number');
-    };
-    // データが正しい形式である場合のみ保存
-    if (isValidData(kintoreData)) {
-        fs.writeFileSync(kintoreFilePath, JSON.stringify(kintoreData, null, 2));
-        res.json({ message: 'Data updated successfully', username, kintore });
-    }
-    else {
-        res.status(400).json({ message: 'Invalid data format' });
-    }
+    // データを保存
+    fs.writeFileSync(kintoreFilePath, JSON.stringify(kintoreData, null, 2));
+    res.json({ message: 'Data updated successfully', username, kintore });
 });
 // /api/kintoreエンドポイントのGETリクエストを処理
 app.get('/api/kintore', (req, res) => {
