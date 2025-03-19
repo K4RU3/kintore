@@ -11,6 +11,10 @@ app.use(cors());
 // JSONリクエストを解析するミドルウェア
 app.use(express.json());
 
+app.get('/api/ping', (req, res) => {
+    res.json({ message: 'pong' });
+});
+
 // 静的ファイルを提供するミドルウェア
 app.use(express.static(path.join(__dirname, 'site')));
 
