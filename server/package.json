@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "build": "tsc",
-    "debug": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts"
+    "debug": "nodemon"
   },
   "author": "rikka",
   "license": "MIT",
