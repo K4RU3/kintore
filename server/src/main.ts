@@ -23,17 +23,21 @@ app.get('/api/get_data', (req, res) => {
 });
 
 app.post('/api/update_data', (req, res) => {
-    if (!validate_network_data(req.body)) {
-        res.status(400).json({ error: 'Invalid request body' });
-        return;
-    }
+    try {
+        if (!validate_network_data(req.body)) {
+            res.status(400).json({ error: 'Invalid request body' });
+            return;
+        }
 
-    const network_data = req.body;
-    if (!update_data(network_data)) {
+        const network_data = req.body;
+        if (!update_data(network_data)) {
+            res.status(500).json({ error: 'Failed to update data' });
+            return;
+        }
+        res.json({ message: 'Data updated successfully' });
+    } catch (error) {
         res.status(500).json({ error: 'Failed to update data' });
-        return;
     }
-    res.json({ message: 'Data updated successfully' });
 });
 
 // 静的ファイルを提供するミドルウェア
@@ -76,8 +80,8 @@ function validate_data(data: any): data is Exercise.DataStructure {
 
     if (data.exercises.some((exercise: any) => 
             typeof exercise !== 'object' || exercise === null ||
-            !('id' in exercise) || !('name' in exercise) || !('unit' in exercise) ||
-            typeof exercise.id !== 'number' || typeof exercise.name !== 'string' || typeof exercise.unit !== 'string')) {
+            !('id' in exercise) || !('name' in exercise) || !('unit' in exercise) || !('description' in exercise) ||
+            typeof exercise.id !== 'number' || typeof exercise.name !== 'string' || typeof exercise.unit !== 'string' || typeof exercise.description !== 'string')) {
         return false;
     }
 
@@ -126,20 +130,34 @@ function validate_network_data(data: any): data is Exercise.NetworkData {
 
 function update_data(network_data: Exercise.NetworkData): boolean {
     try {
+        console.log(network_data);
         let data = get_valid_data();
         const { username, exercises } = network_data;
-        const userid = data.users.find(user => user.username === username)?.id;
+        let userid = data.users.find(user => user.username === username)?.id;
         if (!userid) {
-            throw new Error('User not found');
+            data.users.push({
+                id: data.users.length + 1,
+                username: username
+            });
+            userid = data.users.length;
         }
 
         exercises.forEach(exercise => {
+            console.log(exercise, userid);
             let exercise_data = data.exercises.find(e => e.id === exercise.id);
             if (exercise_data) {
                 let userExerciseCount = data.userExerciseCounts.find(count => count.userId === userid && count.exerciseId === exercise.id);
                 if (userExerciseCount) {
                     userExerciseCount.count += exercise.count;
+                } else {
+                    data.userExerciseCounts.push({
+                        userId: userid,
+                        exerciseId: exercise.id,
+                        count: exercise.count
+                    });
                 }
+            } else {
+                console.warn(`Exercise with id ${exercise.id} not found`);
             }
         });
 

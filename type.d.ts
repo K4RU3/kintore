@@ -7,6 +7,7 @@ export interface Exercise {
     id: number;
     name: string;
     unit: string;
+    description: string;
 }
 
 export interface UserExerciseCount {
