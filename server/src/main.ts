@@ -6,6 +6,7 @@ import * as Exercise from "../../type.js"
 
 const app = express();
 const PORT = 8080;
+const DATA_FILE = path.join('/data', 'kintore.json');
 
 // CORSを有効にする
 app.use(cors());
@@ -51,7 +52,7 @@ app.listen(PORT, () => {
 /* ==========  関数定義 ========== */
 function get_valid_data(): Exercise.DataStructure {
     try {
-        const data = fs.readFileSync(path.join(__dirname, 'kintore.json'), 'utf8');
+        const data = fs.readFileSync(DATA_FILE, 'utf8');
         const jsonData = JSON.parse(data);
         if (!validate_data(jsonData)) {
             return initialize_data();
@@ -101,7 +102,7 @@ function initialize_data(): Exercise.DataStructure {
         exercises: [],
         userExerciseCounts: []
     };
-    fs.writeFileSync(path.join(__dirname, 'kintore.json'), JSON.stringify(data, null, 2));
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
     return data;
 }
 
@@ -161,7 +162,7 @@ function update_data(network_data: Exercise.NetworkData): boolean {
             }
         });
 
-        fs.writeFileSync(path.join(__dirname, 'kintore.json'), JSON.stringify(data, null, 2));
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
         return true;
     } catch (error) {
         console.error('Failed to update data:', error);
