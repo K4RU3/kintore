@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from "fs"
-import * as Exercise from "../../type.js"
+import * as Exercise from "../../type"
 
 const app = express();
 const PORT = 8080;
