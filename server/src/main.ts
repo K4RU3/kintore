@@ -6,7 +6,7 @@ import * as Exercise from "../../type.js"
 
 const app = express();
 const PORT = 8080;
-const DATA_FILE = path.join('/data', 'kintore.json');
+const DATA_FILE = process.env.DEBUG === "true" ? path.join(__dirname, 'kintore.json') : path.join('/data', 'kintore.json');
 
 // CORSを有効にする
 app.use(cors());
