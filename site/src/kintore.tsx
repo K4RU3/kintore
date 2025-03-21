@@ -103,7 +103,7 @@ export default function kintore({ data }: { data: DataStructure }) {
                                         />
 
                                         {data.exercises.map(exercise => (
-                                            <TextField key={exercise.id} label={exercise.name} type='number' fullWidth margin='normal' value={kintore.find(item => item.id === exercise.id)?.count || 0} onChange={e => handle_kintore_change(exercise.id, parseInt(e.target.value) || 0)} InputProps={{ inputProps: { min: 0 } }} />
+                                            <TextField key={exercise.id} label={exercise.name} type='number' fullWidth margin='normal' value={String(kintore.find(item => item.id === exercise.id)?.count || 0)} onChange={e => handle_kintore_change(exercise.id, parseInt(e.target.value) || 0)} InputProps={{ inputProps: { min: 0 } }} />
                                         ))}
 
                                         <Button type='submit' variant='contained' fullWidth sx={{ mt: 2 }} disabled={!username} >
