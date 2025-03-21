@@ -16,12 +16,13 @@ const gennerate_exercise_table = (userCount: UserExerciseCount, index: number, d
 )
 
 export default function kintore({ data }: { data: DataStructure }) {
-    const [username, setUsername] = useState<string>('');
+    const [username, setUsername] = useState<string>(localStorage.getItem('username') || '');
     const [kintore, setKintore] = useState<{ id: number; count: number }[]>([]);
     const [alert, setAlert] = useState<{ severity: 'success' | 'error'; message: string; isOpen: boolean }>({ severity: 'success', message: '', isOpen: false });
     const [allShowRow, setAllShowRow] = useState<number>(-1);
 
     const handle_submit = () => {
+        localStorage.setItem('username', username);
         axios
             .post('/api/update_data', {
                 username: username,
