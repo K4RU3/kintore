@@ -1,5 +1,5 @@
-import { Typography, Box, Fade, Container, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent, Grid, Table, TableHead, TableRow, TableCell, TableBody, Paper, TextField, Autocomplete, Button, Alert, Snackbar, TableContainer } from '@mui/material';
-import { DataStructure, UserExerciseCount } from '../../type.d';
+/// <reference path="../../type.d.ts" />
+import { Typography, Box, Fade, Container, Card, CardContent, Grid, Table, TableHead, TableRow, TableCell, TableBody, Paper, TextField, Autocomplete, Button, Alert, Snackbar, TableContainer } from '@mui/material';
 import { useState } from 'react';
 import axios from 'axios';
 

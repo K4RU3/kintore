@@ -5,6 +5,7 @@ WORKDIR /
 COPY package*.json .
 COPY server/ server/
 COPY site/ site/
+COPY type.d.ts .
 
 RUN npm run setup && npm run build && \
     cp -r server/node_modules /app/node_modules && \

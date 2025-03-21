@@ -1,8 +1,8 @@
+/// <reference path="../../type.d.ts" />
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from "fs"
-import * as Exercise from "../../type"
 
 const app = express();
 const PORT = 8080;
@@ -50,7 +50,7 @@ app.listen(PORT, () => {
 });
 
 /* ==========  関数定義 ========== */
-function get_valid_data(): Exercise.DataStructure {
+function get_valid_data(): DataStructure {
     try {
         const data = fs.readFileSync(DATA_FILE, 'utf8');
         const jsonData = JSON.parse(data);
@@ -63,7 +63,7 @@ function get_valid_data(): Exercise.DataStructure {
     }
 }
 
-function validate_data(data: any): data is Exercise.DataStructure {
+function validate_data(data: any): data is DataStructure {
     if (typeof data !== 'object' || data === null) {
         return false;
     }
@@ -96,8 +96,8 @@ function validate_data(data: any): data is Exercise.DataStructure {
     return true;
 }
 
-function initialize_data(): Exercise.DataStructure {
-    const data: Exercise.DataStructure = {
+function initialize_data(): DataStructure {
+    const data: DataStructure = {
         users: [],
         exercises: [],
         userExerciseCounts: []
@@ -106,7 +106,7 @@ function initialize_data(): Exercise.DataStructure {
     return data;
 }
 
-function validate_network_data(data: any): data is Exercise.NetworkData {
+function validate_network_data(data: any): data is NetworkData {
     if (typeof data !== 'object' || data === null) {
         return false;
     }
@@ -129,7 +129,7 @@ function validate_network_data(data: any): data is Exercise.NetworkData {
     return true;
 }
 
-function update_data(network_data: Exercise.NetworkData): boolean {
+function update_data(network_data: NetworkData): boolean {
     try {
         console.log(network_data);
         let data = get_valid_data();
@@ -143,7 +143,7 @@ function update_data(network_data: Exercise.NetworkData): boolean {
             userid = data.users.length;
         }
 
-        exercises.forEach(exercise => {
+        exercises.forEach((exercise: { id: number; count: number }) => {
             console.log(exercise, userid);
             let exercise_data = data.exercises.find(e => e.id === exercise.id);
             if (exercise_data) {

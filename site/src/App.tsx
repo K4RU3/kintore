@@ -1,9 +1,10 @@
+/// <reference path="../../type.d.ts" />
 import './App.css';
 import { Box, Typography, LinearProgress, Fade, Button } from '@mui/material';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { DataStructure } from '../../type.d';
 import Kintore from './kintore';
+
 function App() {
     const [kintoreData, setKintoreData] = useState<DataStructure | null>(null);
 
@@ -54,10 +55,5 @@ export default App;
 
 async function get_data() {
     const res = await axios.get('/api/get_data');
-    return res.data;
-}
-
-async function update_data(username: string, exercises: { id: number, count: number }[]) {
-    const res = await axios.post('/api/update_data', { username, exercises });
     return res.data;
 }

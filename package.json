@@ -10,7 +10,7 @@
     "debug": "concurrently -n server,site \"npm run debug:server\" \"npm run debug:site\"",
     "debug:server": "cd server && npm run debug",
     "debug:site": "cd site && npm run debug",
-    "setup": "npm run setup:server && npm run setup:site && echo 'all dependencies installed'",
+    "setup": "npm install && npm run setup:server && npm run setup:site && echo 'all dependencies installed'",
     "setup:server": "cd server && npm install",
     "setup:site": "cd site && npm install"
   },
