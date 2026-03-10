@@ -1,0 +1,11 @@
+{
+    "name": "kintore",
+    "domain": "kintore.rikka.one",
+    "port": {
+        "host": 3501,
+        "container": 8080,
+        "protocol": "tcp"
+    },
+    "volume": "kintore_data",
+    "autoBackup": true
+}
