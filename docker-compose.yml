@@ -2,6 +2,8 @@ version: '3.8'
 services:
     app:
         build: .
+        environment:
+            - NODE_ENV=production
         ports:
             - '3501:8080'
         volumes:

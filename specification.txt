@@ -1,0 +1,528 @@
+## 概要
+
+筋トレコミュニティ用 Web カウンターの **正式仕様書（API中心）**。
+フロントは React、バックエンドは Node.js、DB は **SQLite**。
+APIは **REST + CRUD + 厳密なJSON形式**で定義する。
+
+---
+
+# 1 システム構成
+
+## フロントエンド
+
+* React
+* TypeScript
+* ライトモード UI
+
+## バックエンド
+
+* Node.js
+* REST API
+
+## DB
+
+* SQLite
+
+---
+
+# 2 共通API仕様
+
+## Base URL
+
+```
+/api/v1
+```
+
+---
+
+## Content-Type
+
+```
+application/json
+```
+
+---
+
+## レスポンス構造
+
+### 成功
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+---
+
+### エラー
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "description"
+  }
+}
+```
+
+---
+
+# 3 データモデル
+
+## users
+
+```sql
+CREATE TABLE users (
+ id TEXT PRIMARY KEY,
+ name TEXT NOT NULL UNIQUE,
+ created_at INTEGER NOT NULL
+);
+```
+
+---
+
+## exercises
+
+```sql
+CREATE TABLE exercises (
+ id TEXT PRIMARY KEY,
+ name TEXT NOT NULL,
+ unit TEXT NOT NULL,
+ unit_amount INTEGER NOT NULL,
+ counter_amount INTEGER NOT NULL,
+ created_at INTEGER NOT NULL
+);
+```
+
+説明
+
+| field          | description |
+| -------------- | ----------- |
+| name           | 種目名         |
+| unit           | 単位          |
+| unit_amount    | 何単位         |
+| counter_amount | 何カウント減る     |
+
+---
+
+## workout_logs
+
+```sql
+CREATE TABLE workout_logs (
+ id TEXT PRIMARY KEY,
+ user_id TEXT NOT NULL,
+ exercise_id TEXT NOT NULL,
+ input_amount INTEGER NOT NULL,
+ counter_delta INTEGER NOT NULL,
+ created_at INTEGER NOT NULL
+);
+```
+
+---
+
+## user_exercise_counts
+
+```sql
+CREATE TABLE user_exercise_counts (
+ user_id TEXT NOT NULL,
+ exercise_id TEXT NOT NULL,
+ amount INTEGER NOT NULL,
+ PRIMARY KEY (user_id, exercise_id)
+);
+```
+
+---
+
+## global_counter
+
+```sql
+CREATE TABLE global_counter (
+ id INTEGER PRIMARY KEY,
+ remaining_count INTEGER NOT NULL
+);
+```
+
+初期値
+
+```
+1000000000000
+```
+
+---
+
+## exercise_requests
+
+```sql
+CREATE TABLE exercise_requests (
+ id TEXT PRIMARY KEY,
+ name TEXT NOT NULL,
+ unit TEXT NOT NULL,
+ unit_amount INTEGER NOT NULL,
+ counter_amount INTEGER NOT NULL,
+ requested_by TEXT,
+ status TEXT NOT NULL,
+ created_at INTEGER NOT NULL
+);
+```
+
+status
+
+```
+pending
+approved
+rejected
+```
+
+---
+
+# 4 API仕様
+
+---
+
+# 4.1 残りカウンター取得
+
+## GET
+
+```
+GET /api/v1/counter
+```
+
+### response
+
+```json
+{
+  "success": true,
+  "data": {
+    "remaining": 999999999000
+  }
+}
+```
+
+---
+
+# 4.2 種目一覧取得
+
+## GET
+
+```
+GET /api/v1/exercises
+```
+
+### response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "pushup",
+      "name": "腕立て伏せ",
+      "unit": "回",
+      "unitAmount": 1,
+      "counterAmount": 1
+    }
+  ]
+}
+```
+
+---
+
+# 4.3 ユーザー検索（前方一致）
+
+## GET
+
+```
+GET /api/v1/users
+```
+
+### query
+
+```
+?q=ri
+```
+
+### SQL
+
+```
+SELECT id,name
+FROM users
+WHERE name LIKE 'ri%'
+ORDER BY name
+LIMIT 10
+```
+
+---
+
+### response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "u1",
+      "name": "rikka"
+    }
+  ]
+}
+```
+
+---
+
+# 4.4 カウント登録
+
+## POST
+
+```
+POST /api/v1/workouts
+```
+
+### request
+
+```json
+{
+  "userName": "rikka",
+  "exerciseId": "pushup",
+  "amount": 30
+}
+```
+
+---
+
+### サーバー処理
+
+```
+1 users検索
+2 存在しなければ作成
+3 exercises取得
+4 counter_delta計算
+5 workout_logs追加
+6 user_exercise_counts更新
+7 global_counter減算
+```
+
+---
+
+### カウンター計算
+
+```
+counter_delta =
+(counter_amount / unit_amount) * amount
+```
+
+---
+
+### response
+
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "u1",
+    "remaining": 999999999970,
+    "counterDelta": 30
+  }
+}
+```
+
+---
+
+# 4.5 種目ランキング
+
+## GET
+
+```
+GET /api/v1/ranking/{exerciseId}
+```
+
+---
+
+### response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "rank": 1,
+      "userId": "u1",
+      "userName": "rikka",
+      "amount": 320
+    },
+    {
+      "rank": 2,
+      "userId": "u2",
+      "userName": "tanaka",
+      "amount": 200
+    }
+  ]
+}
+```
+
+---
+
+# 4.6 ユーザー名変更
+
+## PATCH
+
+```
+PATCH /api/v1/users/{id}
+```
+
+---
+
+### request
+
+```json
+{
+  "name": "newName"
+}
+```
+
+---
+
+### 重複エラー
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "USERNAME_EXISTS",
+    "message": "username already exists"
+  }
+}
+```
+
+---
+
+# 4.7 種目追加リクエスト
+
+## POST
+
+```
+POST /api/v1/exercise-requests
+```
+
+---
+
+### request
+
+```json
+{
+  "name": "プランク",
+  "unit": "秒",
+  "unitAmount": 30,
+  "counterAmount": 10,
+  "userId": "u1"
+}
+```
+
+---
+
+### response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "req_123",
+    "status": "pending"
+  }
+}
+```
+
+---
+
+# 5 バリデーション
+
+## username
+
+```
+length: 1-32
+unique
+```
+
+---
+
+## unit
+
+```
+length: 1-16
+```
+
+---
+
+## amount
+
+```
+1 ≤ amount ≤ 100000
+```
+
+---
+
+## counter_amount
+
+```
+1 ≤ counter_amount ≤ 100000
+```
+
+---
+
+## unit_amount
+
+```
+1 ≤ unit_amount ≤ 100000
+```
+
+---
+
+# 6 ローカルストレージ仕様
+
+保存キー
+
+```
+workout_user_name
+```
+
+---
+
+ロード時
+
+```
+自動入力
+```
+
+---
+
+登録成功時
+
+```
+localStorage保存
+```
+
+---
+
+# 7 UI仕様
+
+画面構成
+
+```
+右上   設定
+
+中央上 残りカウンター
+
+左下   カウント登録
+
+右下   種目ランキング
+```
+
+---
+
+# まとめ
+
+本システムは **1兆回から減るグローバル筋トレカウンター**を中心に、
+ユーザー名ベースの自動登録、種目単位変換によるカウンター減算、
+SQLiteによる履歴管理と種目別ユーザーランキングを提供する **REST API中心のWebアプリケーション仕様**である。

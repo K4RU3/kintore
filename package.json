@@ -1,0 +1,9 @@
+{
+  "name": "kintore-root",
+  "version": "1.0.0",
+  "scripts": {
+    "setup": "cd server && npm install && cd ../site && npm install",
+    "build": "cd site && npm run build && cd ../server && npx tsc && mkdir -p /app && cp dist/index.js /app/main.js && cp -r ../site/dist /app/site-dist",
+    "start": "NODE_ENV=production node /app/main.js"
+  }
+}
