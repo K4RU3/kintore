@@ -11,3 +11,4 @@ services:
             - kintore_data:/data
 volumes:
     kintore_data:
+        name: kintore_data
