@@ -2,7 +2,7 @@ import express from 'express';
 import Database from 'better-sqlite3';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 
@@ -122,7 +122,7 @@ app.get('/api/v1/exercises', (req, res) => {
 
 // 4.3 ユーザー検索
 app.get('/api/v1/users', (req, res) => {
-  const q = req.query.q as string || '';
+  const q = (req.query.q as string) || '';
   const rows = db.prepare('SELECT id, name FROM users WHERE name LIKE ? ORDER BY name LIMIT 10').all(q + '%') as any[];
   res.json({
     success: true,
@@ -147,7 +147,7 @@ app.post('/api/v1/workouts', (req, res) => {
       // 1-2. user search / creation
       let user = db.prepare('SELECT id, name FROM users WHERE name = ?').get(userName) as { id: string, name: string } | undefined;
       if (!user) {
-        const id = uuidv4();
+        const id = crypto.randomUUID();
         db.prepare('INSERT INTO users (id, name, created_at) VALUES (?, ?, ?)').run(id, userName, Date.now());
         user = { id, name: userName };
       }
@@ -163,7 +163,7 @@ app.post('/api/v1/workouts', (req, res) => {
       const counterDelta = Math.floor((exercise.counter_amount / exercise.unit_amount) * amount);
 
       // 5. workout_logs addition
-      const workoutId = uuidv4();
+      const workoutId = crypto.randomUUID();
       db.prepare('INSERT INTO workout_logs (id, user_id, exercise_id, input_amount, counter_delta, created_at) VALUES (?, ?, ?, ?, ?, ?)')
         .run(workoutId, user.id, exercise.id, amount, counterDelta, Date.now());
 
@@ -263,7 +263,7 @@ app.post('/api/v1/exercise-requests', (req, res) => {
     return res.status(400).json({ success: false, error: { code: 'INVALID_REQUEST', message: 'Missing parameters' } });
   }
 
-  const id = 'req_' + uuidv4().slice(0, 8);
+  const id = 'req_' + crypto.randomUUID().slice(0, 8);
   db.prepare(`
     INSERT INTO exercise_requests (id, name, unit, unit_amount, counter_amount, requested_by, status, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -282,11 +282,11 @@ app.post('/api/v1/exercise-requests', (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   const staticPath = path.join(__dirname, 'site-dist');
   app.use(express.static(staticPath));
-  app.get('*', (req, res) => {
+  app.use((req, res) => {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 }
 
 app.listen(port, () => {
-  console.log(\`Server is running on http://localhost:\${port}\`);
+  console.log(`Server is running on http://localhost:${port}`);
 });

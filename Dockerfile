@@ -1,33 +1,43 @@
 # ビルドステージ
 FROM node:18 AS builder
 
+# ネイティブモジュール（better-sqlite3等）のビルドに必要なツールをインストール
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /build
 
-# ルートのpackage.jsonと各ディレクトリのファイルをコピー
+# 各 package.json を先にコピーしてインストールし、キャッシュを有効化
 COPY package*.json ./
+COPY server/package*.json ./server/
+COPY site/package*.json ./site/
+
+# 依存関係のインストール
+RUN npm run setup
+
+# ソースコードをコピーしてビルド
 COPY server/ server/
 COPY site/ site/
 COPY type.d.ts ./
 
-# 依存関係のインストールとビルド
-# server/dist/index.js が作成され、site/dist が作成される
-# その後、ルートのbuildスクリプトで /app にまとめられる
-RUN npm run setup && npm run build
+# 個別にビルドを実行し、失敗箇所を特定しやすくする
+RUN npm run build:site
+RUN npm run build:server
 
 # 実行ステージ
 FROM node:18-slim
 
-# SQLite3の動作に必要なライブラリをインストール（必要に応じて）
+# SQLite3の動作に必要なランタイムライブラリをインストール
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# ビルド済みバイナリとフロントエンド資産をコピー
-COPY --from=builder /app/main.js ./
-COPY --from=builder /app/site-dist ./site-dist
+# ビルド資産をコピー
+# バックエンドの成果物 (server/dist)
+COPY --from=builder /build/server/dist ./server-dist
+# フロントエンドの成果物 (site/dist)
+COPY --from=builder /build/site/dist ./server-dist/site-dist
 
-# サーバー用の依存関係のみをインストール
-# main.jsが依存するモジュール（better-sqlite3等）を確実に動作させるため
+# 実行用の依存関係のみをインストール
 COPY server/package*.json ./
 RUN npm install --omit=dev
 
@@ -44,5 +54,5 @@ ENV DB_PATH=/data/kintore.db
 # アプリケーションポート
 EXPOSE 8080
 
-# アプリケーションの起動
-CMD ["node", "main.js"]
+# アプリケーションの起動 (server-dist/index.js を実行)
+CMD ["node", "server-dist/index.js"]

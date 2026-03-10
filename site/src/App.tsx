@@ -121,7 +121,7 @@ function App() {
                 type="text" 
                 value={userName} 
                 onChange={(e) => setUserName(e.target.value)} 
-                placeholder="rikka"
+                placeholder="名前を入力"
                 maxLength={32}
                 required
               />
