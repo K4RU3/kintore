@@ -137,6 +137,8 @@ input, select {
   list-style: none;
   padding: 0;
   margin: 0;
+  max-height: 320px;
+  overflow-y: auto;
 }
 
 .ranking-item {
@@ -191,4 +193,73 @@ input, select {
   color: #10b981;
   font-size: 0.875rem;
   margin-top: 0.5rem;
+}
+
+.all-rankings-section {
+  margin-top: 3rem;
+  padding-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.all-rankings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.mini-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+}
+
+.mini-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--primary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.mini-ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mini-ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.mini-rank-number {
+  width: 1.5rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.mini-rank-name {
+  flex-grow: 1;
+}
+
+.mini-rank-amount {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.no-data {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-style: italic;
+  list-style: none;
 }

@@ -8,6 +8,7 @@ function App() {
   const [counter, setCounter] = useState<number>(0);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
+  const [allRankings, setAllRankings] = useState<Record<string, RankingEntry[]>>({});
   const [selectedExercise, setSelectedExercise] = useState<string>('');
   const [rankingExercise, setRankingExercise] = useState<string>('');
   const [userName, setUserName] = useState<string>(localStorage.getItem('workout_user_name') || '');
@@ -36,6 +37,7 @@ function App() {
         setSelectedExercise(exes[0].id);
         setRankingExercise(exes[0].id);
         fetchRanking(exes[0].id);
+        fetchAllRankings(exes);
       }
     } catch (err) {
       console.error(err);
@@ -60,6 +62,19 @@ function App() {
     }
   };
 
+  const fetchAllRankings = async (exes: Exercise[]) => {
+    try {
+      const results: Record<string, RankingEntry[]> = {};
+      await Promise.all(exes.map(async (ex) => {
+        const r = await api.getRanking(ex.id);
+        results[ex.id] = r.slice(0, 3);
+      }));
+      setAllRankings(results);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userName || !selectedExercise || amount <= 0) return;
@@ -71,6 +86,7 @@ function App() {
       setSuccessMsg(`登録完了! (-${res.counterDelta})`);
       setTimeout(() => setSuccessMsg(''), 3000);
       fetchRanking(rankingExercise);
+      fetchAllRankings(exercises);
     } catch (err) {
       alert('エラーが発生しました');
     }
@@ -184,6 +200,29 @@ function App() {
           </ul>
         </section>
       </main>
+
+      <section className="all-rankings-section">
+        <h2 className="section-title">全種目トップ3</h2>
+        <div className="all-rankings-grid">
+          {exercises.map(ex => (
+            <div key={ex.id} className="mini-card">
+              <h3 className="mini-card-title">{ex.name}</h3>
+              <ul className="mini-ranking-list">
+                {(allRankings[ex.id] || []).map(item => (
+                  <li key={item.userId} className="mini-ranking-item">
+                    <span className="mini-rank-number">{item.rank}</span>
+                    <span className="mini-rank-name">{item.userName}</span>
+                    <span className="mini-rank-amount">{item.amount.toLocaleString()} {ex.unit}</span>
+                  </li>
+                ))}
+                {(!allRankings[ex.id] || allRankings[ex.id].length === 0) && (
+                  <li className="no-data">データなし</li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {showSettings && (
         <div className="modal-overlay" onClick={() => setShowSettings(false)}>
